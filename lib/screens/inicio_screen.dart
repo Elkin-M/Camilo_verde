@@ -185,23 +185,8 @@ class _SeccionInicioState extends State<SeccionInicio> {
   List<Widget> _obtenerSlidesCarrusel() {
     final slides = <Widget>[
       Container(
-        margin: const EdgeInsets.symmetric(horizontal: 5),
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [Colors.green.shade800, Colors.green.shade500],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: const Color(0xFF2E7D32)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,62 +247,58 @@ class _SeccionInicioState extends State<SeccionInicio> {
             .replaceAll('.mov', '.jpg');
       }
       slides.add(
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 5),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.network(
-                  urlImagen,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image, size: 40),
-                  ),
+        ClipRect(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                urlImagen,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 40),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.black.withValues(alpha: 0.7),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 15,
-                  left: 15,
-                  right: 15,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        evidencia['nombre'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        evidencia['fecha'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.lightGreenAccent,
-                          fontSize: 11,
-                        ),
-                      ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withValues(alpha: 0.7),
+                      Colors.transparent,
                     ],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
                   ),
                 ),
-              ],
-            ),
+              ),
+              Positioned(
+                bottom: 15,
+                left: 15,
+                right: 15,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      evidencia['nombre'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      evidencia['fecha'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.lightGreenAccent,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -337,7 +318,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
       _buildSeccionTitulo('Bienvenido a Camilo Verde'),
       const SizedBox(height: 12),
       SizedBox(
-        height: 210,
+        height: 230,
         child: Column(
           children: [
             Expanded(
