@@ -50,15 +50,16 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
     SeccionInicio(),
     JuegosScreen(),
     SeccionGaleria(),
-    Proyecto3dScreen(),
-    SeccionInfo(),
     SeccionEventos(),
+    SeccionInfo(),
+    Proyecto3dScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 82,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -80,12 +81,20 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
               },
               child: Image.asset(
                 'assets/images/camiloverdefulllogo.png',
-                height: 48,
+                height: 76,
                 fit: BoxFit.contain,
               ),
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Nosotros',
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => setState(() => _indiceActual = 4),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Container(
         width: double.infinity,
@@ -100,13 +109,16 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
         child: _paginas[_indiceActual],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _indiceActual,
+        currentIndex: _indiceActual == 5 ? 4 : _indiceActual,
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: 10,
+        unselectedFontSize: 9,
+        iconSize: 21,
         selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
-            _indiceActual = index;
+            _indiceActual = index == 4 ? 5 : index;
           });
         },
         items: const [
@@ -119,12 +131,11 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
             icon: Icon(Icons.photo_library),
             label: 'Galería',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Eventos'),
           BottomNavigationBarItem(
             icon: Icon(Icons.view_in_ar),
-            label: 'Proyecto 3D',
+            label: 'Próximo',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.info), label: 'Nosotros'),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Eventos'),
         ],
       ),
     );

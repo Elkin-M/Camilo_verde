@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,17 +25,37 @@ class _SeccionInicioState extends State<SeccionInicio> {
 
   int _indiceCarrusel = 0;
   final PageController _pageController = PageController();
+  Timer? _temporizadorCarrusel;
 
   @override
   void initState() {
     super.initState();
     _cargarTodo();
+    _temporizadorCarrusel = Timer.periodic(
+      const Duration(seconds: 4),
+      (_) => _avanzarCarrusel(),
+    );
   }
 
   @override
   void dispose() {
+    _temporizadorCarrusel?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _avanzarCarrusel() {
+    if (!mounted || !_pageController.hasClients) return;
+
+    final totalSlides = fotosRecientes.length + 1;
+    if (totalSlides <= 1) return;
+
+    final siguiente = (_indiceCarrusel + 1) % totalSlides;
+    _pageController.animateToPage(
+      siguiente,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> _cargarTodo() async {
@@ -444,25 +465,17 @@ class _SeccionInicioState extends State<SeccionInicio> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  esVideo
-                      ? MiniaturaVideo(
-                          videoUrl: primeraImagen,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.network(
-                          primeraImagen,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, error, stackTrace) => const Center(
-                            child: Icon(Icons.broken_image, size: 40),
-                          ),
-                        ),
-                  if (esVideo)
+            if (esVideo)
+              SizedBox(
+                height: 280,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    MiniaturaVideo(
+                      videoUrl: primeraImagen,
+                      fit: BoxFit.contain,
+                    ),
                     const Center(
                       child: Icon(
                         Icons.play_circle_fill,
@@ -470,9 +483,23 @@ class _SeccionInicioState extends State<SeccionInicio> {
                         size: 48,
                       ),
                     ),
-                ],
+                  ],
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                color: Colors.grey[100],
+                child: Image.network(
+                  primeraImagen,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, error, stackTrace) => const SizedBox(
+                    height: 180,
+                    child: Center(child: Icon(Icons.broken_image, size: 40)),
+                  ),
+                ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.all(15),
               child: Column(
@@ -765,11 +792,12 @@ class _SeccionInicioState extends State<SeccionInicio> {
               ),
               child: Image.network(
                 noticia['imagen'],
-                height: 200,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
+                color: Colors.grey[100],
+                colorBlendMode: BlendMode.dstOver,
                 errorBuilder: (_, error, stackTrace) => const SizedBox(
-                  height: 200,
+                  height: 180,
                   child: Center(child: Icon(Icons.broken_image, size: 40)),
                 ),
               ),
