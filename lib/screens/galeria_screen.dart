@@ -208,108 +208,112 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
           builder: (context, setModalState) {
             return FractionallySizedBox(
               heightFactor: 0.9,
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.4,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.of(context).size.height * 0.4,
+                          ),
+                          child: PageView.builder(
+                            controller: detalleController,
+                            itemCount: archivos.length,
+                            onPageChanged: (index) =>
+                                setModalState(() => paginaActual = index),
+                            itemBuilder: (context, index) {
+                              return Center(
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ZoomPage(
+                                              assetPath: archivos[index],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 10,
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            17,
+                                          ),
+                                          child: Image.network(
+                                            archivos[index],
+                                            fit: BoxFit.scaleDown,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(
+                                                      Icons.broken_image,
+                                                      size: 50,
+                                                      color: Colors.grey,
+                                                    ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const Positioned(
+                                      top: 22,
+                                      right: 22,
+                                      child: Icon(
+                                        Icons.zoom_in,
+                                        color: Colors.black54,
+                                        size: 28,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                        child: PageView.builder(
-                          controller: detalleController,
-                          itemCount: archivos.length,
-                          onPageChanged: (index) =>
-                              setModalState(() => paginaActual = index),
-                          itemBuilder: (context, index) {
-                            return Center(
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ZoomPage(
-                                            assetPath: archivos[index],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            blurRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(17),
-                                        child: Image.network(
-                                          archivos[index],
-                                          fit: BoxFit.scaleDown,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  const Icon(
-                                                    Icons.broken_image,
-                                                    size: 50,
-                                                    color: Colors.grey,
-                                                  ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const Positioned(
-                                    top: 22,
-                                    right: 22,
-                                    child: Icon(
-                                      Icons.zoom_in,
-                                      color: Colors.black54,
-                                      size: 28,
-                                    ),
-                                  ),
-                                ],
+                        if (paginaActual > 0)
+                          Positioned(
+                            left: 10,
+                            child: _buildBotonNavegacion(
+                              icon: Icons.arrow_back_ios_new,
+                              onPressed: () => detalleController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      if (paginaActual > 0)
-                        Positioned(
-                          left: 10,
-                          child: _buildBotonNavegacion(
-                            icon: Icons.arrow_back_ios_new,
-                            onPressed: () => detalleController.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
                             ),
                           ),
-                        ),
-                      if (paginaActual < archivos.length - 1)
-                        Positioned(
-                          right: 10,
-                          child: _buildBotonNavegacion(
-                            icon: Icons.arrow_forward_ios,
-                            onPressed: () => detalleController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
+                        if (paginaActual < archivos.length - 1)
+                          Positioned(
+                            right: 10,
+                            child: _buildBotonNavegacion(
+                              icon: Icons.arrow_forward_ios,
+                              onPressed: () => detalleController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
+                      ],
+                    ),
+                    Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,8 +363,8 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -478,6 +482,7 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                       : Image.network(
                                           primeraImagen,
                                           fit: BoxFit.cover,
+                                          alignment: Alignment.topCenter,
                                           errorBuilder:
                                               (context, error, stackTrace) =>
                                                   const Icon(

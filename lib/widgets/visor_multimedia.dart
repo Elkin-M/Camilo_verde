@@ -13,7 +13,8 @@ Future<void> descargarImagen(BuildContext context, String url) async {
   try {
     final response = await http.get(Uri.parse(url));
     final tempDir = await getTemporaryDirectory();
-    final path = '${tempDir.path}/evidencia_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final path =
+        '${tempDir.path}/evidencia_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final file = File(path);
     await file.writeAsBytes(response.bodyBytes);
     await Gal.putImage(file.path);
@@ -202,13 +203,20 @@ class _MiniaturaVideoState extends State<MiniaturaVideo> {
       return Image.memory(
         _bytes!,
         fit: widget.fit,
+        alignment: Alignment.topCenter,
         errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.broken_image, color: Colors.grey),
       );
     } else if (_error) {
-      return const Icon(Icons.play_circle_outline, color: Colors.grey, size: 50);
+      return const Icon(
+        Icons.play_circle_outline,
+        color: Colors.grey,
+        size: 50,
+      );
     } else {
-      return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green));
+      return const Center(
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
+      );
     }
   }
 }
