@@ -1,12 +1,11 @@
-import 'dart:async';
-import 'package:camilo_verde/game.dart';
-import "package:flame/components.dart";
+﻿import 'dart:async';
+import 'package:camilo_verde/game/camilo_game.dart';
+import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 
-
-class WorldLevel extends World{
+class WorldLevel extends World {
   @override
-  Future<void> onLoad() async{
+  Future<void> onLoad() async {
     add(await loadParallaxComponent());
   }
 
@@ -18,7 +17,7 @@ class WorldLevel extends World{
       ],
       baseVelocity: Vector2(50, 0),
       velocityMultiplierDelta: Vector2(1.5, 1),
-      size: MyGame.sceneSize,
+      size: CamiloGame.sceneSize,
     );
- }
+  }
 }

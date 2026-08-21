@@ -27,7 +27,7 @@ class JuegosScreen extends StatelessWidget {
                 'assets/images/juegos_botellas.png',
                 height: 180,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -111,13 +111,39 @@ class _JuegoItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        minLeadingWidth: 42,
         leading: CircleAvatar(
           backgroundColor: Colors.green[100],
           child: Icon(icon, color: Colors.green[800]),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(description),
-        trailing: const Chip(label: Text('Próximo')),
+        title: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+        subtitle: Text(
+          description,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 10, height: 1.2),
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple[100],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            'Jugar',
+            style: TextStyle(
+              color: Colors.deepPurple[800],
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
