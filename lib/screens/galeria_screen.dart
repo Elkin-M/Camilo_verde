@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:camilo_verde/config/constants.dart';
@@ -104,7 +104,8 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
     final PageController detalleController = PageController();
     int paginaActual = 0;
 
-    bool esVideo = url.toLowerCase().contains('.mp4') ||
+    bool esVideo =
+        url.toLowerCase().contains('.mp4') ||
         url.toLowerCase().contains('.mov') ||
         url.contains('video/upload');
 
@@ -134,9 +135,7 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                     color: Colors.black,
                     width: double.infinity,
                     height: MediaQuery.of(context).size.height * 0.35,
-                    child: Center(
-                      child: VisorMultimedia(path: url),
-                    ),
+                    child: Center(child: VisorMultimedia(path: url)),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -154,8 +153,11 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                 fontSize: 14,
                               ),
                             ),
-                            const Icon(Icons.video_library,
-                                color: Colors.grey, size: 20),
+                            const Icon(
+                              Icons.video_library,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 10),
@@ -238,14 +240,17 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 10),
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: const [
                                           BoxShadow(
-                                              color: Colors.black26,
-                                              blurRadius: 10)
+                                            color: Colors.black26,
+                                            blurRadius: 10,
+                                          ),
                                         ],
                                       ),
                                       child: ClipRRect(
@@ -256,10 +261,10 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                           errorBuilder:
                                               (context, error, stackTrace) =>
                                                   const Icon(
-                                            Icons.broken_image,
-                                            size: 50,
-                                            color: Colors.grey,
-                                          ),
+                                                    Icons.broken_image,
+                                                    size: 50,
+                                                    color: Colors.grey,
+                                                  ),
                                         ),
                                       ),
                                     ),
@@ -267,8 +272,11 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                   const Positioned(
                                     top: 22,
                                     right: 22,
-                                    child: Icon(Icons.zoom_in,
-                                        color: Colors.black54, size: 28),
+                                    child: Icon(
+                                      Icons.zoom_in,
+                                      color: Colors.black54,
+                                      size: 28,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -339,8 +347,9 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green[800],
                                 foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -385,9 +394,7 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
     }
 
     if (evidencias.isEmpty) {
-      return const Center(
-        child: Text("No hay evidencias registradas todavía"),
-      );
+      return const Center(child: Text("No hay evidencias registradas todavía"));
     }
 
     return Column(
@@ -430,7 +437,7 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 10),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
                 childAspectRatio: 0.8,
@@ -439,7 +446,8 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
               itemBuilder: (context, index) {
                 final Map<String, dynamic> evidencia = evidencias[index];
                 final String primeraImagen = evidencia['imagenes'][0];
-                final bool esVideo = primeraImagen.toLowerCase().contains('.mp4') ||
+                final bool esVideo =
+                    primeraImagen.toLowerCase().contains('.mp4') ||
                     primeraImagen.toLowerCase().contains('.mov') ||
                     primeraImagen.contains('video/upload');
 
@@ -470,24 +478,29 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
                                       : Image.network(
                                           primeraImagen,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error,
-                                                  stackTrace) =>
-                                              const Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                          ),
-                                          loadingBuilder: (context, child,
-                                              loadingProgress) {
-                                            if (loadingProgress == null) {
-                                              return child;
-                                            }
-                                            return const Center(
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.green,
-                                              ),
-                                            );
-                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(
+                                                    Icons.broken_image,
+                                                    color: Colors.grey,
+                                                  ),
+                                          loadingBuilder:
+                                              (
+                                                context,
+                                                child,
+                                                loadingProgress,
+                                              ) {
+                                                if (loadingProgress == null) {
+                                                  return child;
+                                                }
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        color: Colors.green,
+                                                      ),
+                                                );
+                                              },
                                         ),
                                 ),
                                 if (esVideo)
