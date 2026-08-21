@@ -1,4 +1,4 @@
-﻿import 'package:camilo_verde/game/camilo_game.dart';
+import 'package:camilo_verde/game/camilo_game.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +13,7 @@ class JuegoScreen extends StatelessWidget {
         backgroundColor: Colors.green[800],
         foregroundColor: Colors.white,
       ),
-      body: GameWidget(
-        game: CamiloGame(),
-      ),
+      body: SizedBox.expand(child: GameWidget(game: CamiloGame())),
     );
   }
 }

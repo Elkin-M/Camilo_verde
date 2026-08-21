@@ -315,8 +315,6 @@ class _SeccionInicioState extends State<SeccionInicio> {
     }
     final slides = _obtenerSlidesCarrusel();
     final contenido = <Widget>[
-      _buildSeccionTitulo('Bienvenido a Camilo Verde'),
-      const SizedBox(height: 12),
       SizedBox(
         height: 230,
         child: Column(
@@ -353,6 +351,8 @@ class _SeccionInicioState extends State<SeccionInicio> {
         ),
       ),
       const SizedBox(height: 25),
+      _buildSeccionTitulo('Bienvenido a Camilo Verde'),
+      const SizedBox(height: 12),
       _buildSeccionTitulo('Multimedia reciente'),
       const SizedBox(height: 10),
       _buildMultimediaReciente(),

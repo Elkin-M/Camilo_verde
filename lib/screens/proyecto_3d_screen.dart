@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 class Proyecto3dScreen extends StatelessWidget {
   const Proyecto3dScreen({super.key});
@@ -28,17 +29,15 @@ class Proyecto3dScreen extends StatelessWidget {
           style: TextStyle(fontSize: 15),
         ),
         const SizedBox(height: 18),
-        Card(
-          clipBehavior: Clip.antiAlias,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Image.asset(
-            'assets/images/proyecto_3d.png',
-            width: double.infinity,
-            height: 280,
-            fit: BoxFit.contain,
+        SizedBox(
+          height: 320,
+          child: ModelViewer(
+            src: 'assets/models/ecopunto_camilista.glb',
+            alt: 'Modelo 3D del Ecopunto Camilista',
+            autoRotate: true,
+            cameraControls: true,
+            ar: false,
+            backgroundColor: Colors.white,
           ),
         ),
         const SizedBox(height: 18),
