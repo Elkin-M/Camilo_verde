@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:camilo_verde/config/constants.dart';
+import 'package:camilo_verde/widgets/visor_multimedia.dart';
 
 class SeccionInicio extends StatefulWidget {
   const SeccionInicio({super.key});
@@ -184,33 +185,42 @@ class _SeccionInicioState extends State<SeccionInicio> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('🌱 ¡Bienvenidos!',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12)),
+            const Text(
+              '🌱 ¡Bienvenidos!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
             const SizedBox(height: 10),
-            const Text('Proyecto Ambiental PRAE Camilo Verde',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
+            const Text(
+              'Proyecto Ambiental PRAE Camilo Verde',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 6),
             const Text(
-                'Descubre nuestras iniciativas ecológicas y los avances recientes de nuestra comunidad.',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis),
+              'Descubre nuestras iniciativas ecológicas y los avances recientes de nuestra comunidad.',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const Spacer(),
             ElevatedButton.icon(
               onPressed: () => _abrirVideo(AppConstants.videoAvancesUrl),
               icon: const Icon(Icons.play_circle_fill, color: Colors.green),
               label: const Text('Ver Últimos Avances'),
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.green.shade900,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25))),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.green.shade900,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
             ),
           ],
         ),
@@ -224,64 +234,70 @@ class _SeccionInicioState extends State<SeccionInicio> {
       if (urlImagen.toLowerCase().contains('.mp4') ||
           urlImagen.toLowerCase().contains('.mov') ||
           urlImagen.contains('video/upload')) {
-        urlImagen =
-            urlImagen.replaceAll('.mp4', '.jpg').replaceAll('.mov', '.jpg');
+        urlImagen = urlImagen
+            .replaceAll('.mp4', '.jpg')
+            .replaceAll('.mov', '.jpg');
       }
-      slides.add(Container(
-        margin: const EdgeInsets.symmetric(horizontal: 5),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                urlImagen,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image, size: 40),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withValues(alpha: 0.7),
-                      Colors.transparent
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
+      slides.add(
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  urlImagen,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.broken_image, size: 40),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 15,
-                left: 15,
-                right: 15,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      evidencia['nombre'] ?? '',
-                      style: const TextStyle(
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.7),
+                        Colors.transparent,
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 15,
+                  left: 15,
+                  right: 15,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        evidencia['nombre'] ?? '',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      evidencia['fecha'] ?? '',
-                      style: const TextStyle(
-                          color: Colors.lightGreenAccent, fontSize: 11),
-                    ),
-                  ],
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        evidencia['fecha'] ?? '',
+                        style: const TextStyle(
+                          color: Colors.lightGreenAccent,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ));
+      );
     }
     return slides;
   }
@@ -289,7 +305,9 @@ class _SeccionInicioState extends State<SeccionInicio> {
   @override
   Widget build(BuildContext context) {
     if (cargandoNoticias || cargandoFotos) {
-      return const Center(child: CircularProgressIndicator(color: Colors.green));
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.green),
+      );
     }
     final slides = _obtenerSlidesCarrusel();
     final contenido = <Widget>[
@@ -350,19 +368,29 @@ class _SeccionInicioState extends State<SeccionInicio> {
         ...eventosProximos.map(
           (evento) => Card(
             margin: const EdgeInsets.only(bottom: 10),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
             child: ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                    color: Colors.green[100], shape: BoxShape.circle),
-                child: const Icon(Icons.calendar_today,
-                    color: Colors.green, size: 20),
+                  color: Colors.green[100],
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.calendar_today,
+                  color: Colors.green,
+                  size: 20,
+                ),
               ),
-              title: Text(evento['titulo'],
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('${evento['fechaTexto']} - ${evento['horaTexto']}'),
+              title: Text(
+                evento['titulo'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                '${evento['fechaTexto']} - ${evento['horaTexto']}',
+              ),
               trailing: const Icon(Icons.arrow_forward_ios, size: 14),
               onTap: () => _mostrarDetalleEvento(context, evento),
             ),
@@ -382,136 +410,343 @@ class _SeccionInicioState extends State<SeccionInicio> {
   }
 
   Widget _buildSeccionTitulo(String titulo) => Text(
-        titulo,
-        style: GoogleFonts.unbounded(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.green[800]),
-      );
+    titulo,
+    style: GoogleFonts.unbounded(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.green[800],
+    ),
+  );
 
   Widget _buildMultimediaReciente() {
     if (fotosRecientes.isEmpty) {
       return const Text('No hay multimedia reciente');
     }
 
-    return SizedBox(
-      height: 190,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: fotosRecientes.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final evidencia = fotosRecientes[index];
-          final imagenes = evidencia['imagenes'];
-          if (imagenes is! List || imagenes.isEmpty) {
-            return const SizedBox.shrink();
-          }
+    final evidencia = fotosRecientes.first;
+    final imagenes = evidencia['imagenes'];
+    if (imagenes is! List || imagenes.isEmpty) {
+      return const Text('No hay multimedia reciente');
+    }
 
-          var urlImagen = imagenes.first.toString();
-          if (urlImagen.toLowerCase().contains('.mp4') ||
-              urlImagen.toLowerCase().contains('.mov') ||
-              urlImagen.contains('video/upload')) {
-            urlImagen =
-                urlImagen.replaceAll('.mp4', '.jpg').replaceAll('.mov', '.jpg');
-          }
+    final primeraImagen = imagenes.first.toString();
+    final esVideo =
+        primeraImagen.toLowerCase().contains('.mp4') ||
+        primeraImagen.toLowerCase().contains('.mov') ||
+        primeraImagen.contains('video/upload');
 
-          return SizedBox(
-            width: 180,
-            child: Card(
-              clipBehavior: Clip.antiAlias,
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: InkWell(
-                onTap: () => _mostrarDetalleMultimedia(context, evidencia),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Image.network(
-                        urlImagen,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, error, stackTrace) => const Center(
-                          child: Icon(Icons.broken_image, color: Colors.grey),
+    return Card(
+      elevation: 4,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: () => _mostrarDetalleMultimedia(context, evidencia),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  esVideo
+                      ? MiniaturaVideo(
+                          videoUrl: primeraImagen,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.network(
+                          primeraImagen,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, error, stackTrace) => const Center(
+                            child: Icon(Icons.broken_image, size: 40),
+                          ),
                         ),
+                  if (esVideo)
+                    const Center(
+                      child: Icon(
+                        Icons.play_circle_fill,
+                        color: Colors.white70,
+                        size: 48,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            evidencia['nombre'] ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            evidencia['fecha'] ?? '',
-                            style: const TextStyle(
-                                color: Colors.green, fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
-          );
-        },
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Última evidencia subida',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'Explora esta y todas las más recientes evidencias de nuestro proyecto ambiental en la sección Galería.',
+                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _mostrarDetalleMultimedia(
-      BuildContext context, Map<String, dynamic> evidencia) {
-    final imagenes = evidencia['imagenes'];
-    if (imagenes is! List || imagenes.isEmpty) return;
+    BuildContext context,
+    Map<String, dynamic> evidencia,
+  ) {
+    _mostrarDetalleGaleria(context, evidencia);
+  }
+
+  void _mostrarDetalleGaleria(BuildContext context, Map<String, dynamic> data) {
+    final archivos = List<String>.from(data['imagenes']);
+    final url = data['imagenes'][0].toString();
+    final detalleController = PageController();
+    int paginaActual = 0;
+    final esVideo =
+        url.toLowerCase().contains('.mp4') ||
+        url.toLowerCase().contains('.mov') ||
+        url.contains('video/upload');
+
+    if (esVideo) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.green[800],
+              iconTheme: const IconThemeData(color: Colors.white),
+              title: const Text('Video', style: TextStyle(color: Colors.white)),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  onPressed: () => descargarVideo(context, url),
+                ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    color: Colors.black,
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.35,
+                    child: Center(child: VisorMultimedia(path: url)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['fecha'] ?? '',
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          data['nombre'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Divider(height: 30),
+                        const Text(
+                          'Descripción:',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          data['desc'] ?? '',
+                          style: const TextStyle(fontSize: 16, height: 1.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => FractionallySizedBox(
+          heightFactor: 0.9,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(evidencia['nombre'] ?? '',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(evidencia['fecha'] ?? '',
-                  style: const TextStyle(
-                      color: Colors.green, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 15),
-              ...imagenes.map((imagen) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        imagen.toString(),
-                        width: double.infinity,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, error, stackTrace) => const SizedBox(
-                          height: 120,
-                          child: Center(child: Icon(Icons.broken_image)),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.4,
+                    ),
+                    child: PageView.builder(
+                      controller: detalleController,
+                      itemCount: archivos.length,
+                      onPageChanged: (index) =>
+                          setModalState(() => paginaActual = index),
+                      itemBuilder: (context, index) => Center(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ZoomPage(assetPath: archivos[index]),
+                                ),
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(17),
+                                  child: Image.network(
+                                    archivos[index],
+                                    fit: BoxFit.scaleDown,
+                                    errorBuilder: (_, error, stackTrace) =>
+                                        const Icon(
+                                          Icons.broken_image,
+                                          size: 50,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Positioned(
+                              top: 22,
+                              right: 22,
+                              child: Icon(
+                                Icons.zoom_in,
+                                color: Colors.black54,
+                                size: 28,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  )),
-              if ((evidencia['desc'] ?? '').toString().isNotEmpty) ...[
-                const Divider(),
-                Text(evidencia['desc']),
-              ],
+                  ),
+                  if (paginaActual > 0)
+                    Positioned(
+                      left: 10,
+                      child: _buildBotonNavegacion(
+                        icon: Icons.arrow_back_ios_new,
+                        onPressed: () => detalleController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        ),
+                      ),
+                    ),
+                  if (paginaActual < archivos.length - 1)
+                    Positioned(
+                      right: 10,
+                      child: _buildBotonNavegacion(
+                        icon: Icons.arrow_forward_ios,
+                        onPressed: () => detalleController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['nombre'],
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        data['fecha'] ?? '',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Divider(height: 15),
+                      Text(
+                        data['desc'],
+                        style: const TextStyle(fontSize: 16, height: 1.5),
+                      ),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () =>
+                              descargarImagen(context, archivos[paginaActual]),
+                          icon: const Icon(Icons.cloud_download),
+                          label: const Text('Descargar Imagen'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[800],
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBotonNavegacion({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.black26,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 20),
+        onPressed: onPressed,
       ),
     );
   }
@@ -525,8 +760,9 @@ class _SeccionInicioState extends State<SeccionInicio> {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(15),
+              ),
               child: Image.network(
                 noticia['imagen'],
                 height: 200,
@@ -539,11 +775,16 @@ class _SeccionInicioState extends State<SeccionInicio> {
               ),
             ),
             ListTile(
-              title: Text(noticia['titulo'],
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(
+                noticia['titulo'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               subtitle: Text(noticia['fechaTexto']),
-              trailing: const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Colors.green),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.green,
+              ),
             ),
           ],
         ),
@@ -552,7 +793,9 @@ class _SeccionInicioState extends State<SeccionInicio> {
   }
 
   void _mostrarDetalleNoticia(
-      BuildContext context, Map<String, dynamic> noticia) {
+    BuildContext context,
+    Map<String, dynamic> noticia,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -566,24 +809,36 @@ class _SeccionInicioState extends State<SeccionInicio> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(noticia['imagen'],
-                    width: double.infinity, fit: BoxFit.cover),
+                Image.network(
+                  noticia['imagen'],
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(noticia['fechaTexto'],
-                          style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        noticia['fechaTexto'],
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      Text(noticia['titulo'],
-                          style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold)),
+                      Text(
+                        noticia['titulo'],
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const Divider(height: 30),
-                      Text(noticia['contenido'],
-                          style: const TextStyle(fontSize: 15, height: 1.5)),
+                      Text(
+                        noticia['contenido'],
+                        style: const TextStyle(fontSize: 15, height: 1.5),
+                      ),
                     ],
                   ),
                 ),
@@ -596,20 +851,24 @@ class _SeccionInicioState extends State<SeccionInicio> {
   }
 
   void _mostrarDetalleEvento(
-      BuildContext context, Map<String, dynamic> evento) {
+    BuildContext context,
+    Map<String, dynamic> evento,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(evento['titulo'] ?? '',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              evento['titulo'] ?? '',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             Text('📅 Fecha: ${evento['fechaTexto']} ${evento['horaTexto']}'),
             const SizedBox(height: 5),
