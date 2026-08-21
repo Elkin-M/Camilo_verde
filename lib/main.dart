@@ -23,6 +23,7 @@ import 'package:flame/game.dart';
 // ignore: 
 import 'package:flame/components.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:camilo_verde/seccion_inicio.dart';
 
 
 void main() async {
@@ -146,13 +147,13 @@ class CamiloVerdeApp extends StatelessWidget {
 // --- Aquí se define el contenido de cada sección  ---
 
 
-class SeccionInicio extends StatefulWidget {
-  const SeccionInicio({super.key});
+class SeccionInicioAnterior extends StatefulWidget {
+  const SeccionInicioAnterior({super.key});
 
   @override
-  State<SeccionInicio> createState() => _SeccionInicioState();
+  State<SeccionInicioAnterior> createState() => _SeccionInicioAnteriorState();
 }
-class _SeccionInicioState extends State<SeccionInicio> {
+class _SeccionInicioAnteriorState extends State<SeccionInicioAnterior> {
   List<Map<String, dynamic>> noticiasDinamicas = [];
 List<Map<String, dynamic>> fotosRecientes = []; 
 List<Map<String, dynamic>> eventosProximos = [];
