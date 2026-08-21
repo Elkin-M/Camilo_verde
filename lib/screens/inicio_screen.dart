@@ -32,7 +32,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
     super.initState();
     _cargarTodo();
     _temporizadorCarrusel = Timer.periodic(
-      const Duration(seconds: 4),
+      const Duration(seconds: 7),
       (_) => _avanzarCarrusel(),
     );
   }
@@ -231,15 +231,17 @@ class _SeccionInicioState extends State<SeccionInicio> {
               overflow: TextOverflow.ellipsis,
             ),
             const Spacer(),
-            ElevatedButton.icon(
-              onPressed: () => _abrirVideo(AppConstants.videoAvancesUrl),
-              icon: const Icon(Icons.play_circle_fill, color: Colors.green),
-              label: const Text('Ver Últimos Avances'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.green.shade900,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () => _abrirVideo(AppConstants.videoAvancesUrl),
+                icon: const Icon(Icons.play_circle_fill, color: Colors.green),
+                label: const Text('Ver Últimos Avances'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.green.shade900,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                 ),
               ),
             ),
