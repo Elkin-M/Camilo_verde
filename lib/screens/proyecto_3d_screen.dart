@@ -32,8 +32,8 @@ class Proyecto3dScreen extends StatelessWidget {
         SizedBox(
           height: 320,
           child: ModelViewer(
-            src: 'assets/models/ecopunto_camilista.glb',
-            alt: 'Modelo 3D del Ecopunto Camilista',
+            src: 'assets/models/huerta.glb',
+            alt: 'Modelo 3D de la huerta Camilista',
             autoRotate: true,
             cameraControls: true,
             ar: false,
