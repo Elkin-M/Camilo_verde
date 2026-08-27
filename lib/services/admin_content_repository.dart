@@ -25,8 +25,22 @@ class AdminContentRepository {
 
   Future<void> setHomeVideo(String url) => _db.collection('settings').doc('home').set({'videoUrl': url, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
 
+  Future<void> setHomeCarousel({required String imageUrl, required String title, required String description}) =>
+      _db.collection('settings').doc('home').set({
+        'carouselImageUrl': imageUrl,
+        'carouselTitle': title,
+        'carouselDescription': description,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
   Future<void> delete(String collection, String id, {List<String> fileIds = const []}) async {
-    for (final fileId in fileIds) { await _drive.trash(fileId); }
+    for (final fileId in fileIds) {
+      try {
+        await _drive.trash(fileId);
+      } catch (_) {
+        // El registro de Firebase debe poder eliminarse aunque Drive ya no encuentre el archivo.
+      }
+    }
     await _db.collection(collection).doc(id).delete();
   }
 }

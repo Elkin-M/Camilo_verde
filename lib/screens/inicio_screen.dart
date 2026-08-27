@@ -24,6 +24,9 @@ class _SeccionInicioState extends State<SeccionInicio> {
   bool cargandoFotos = true;
   bool cargandoEventos = true;
   String _videoAvancesUrl = AppConstants.videoAvancesUrl;
+  String _carouselImageUrl = '';
+  String _carouselTitle = 'Proyecto Ambiental PRAE Camilo Verde';
+  String _carouselDescription = 'Descubre nuestras iniciativas ecológicas y los avances recientes de nuestra comunidad.';
 
   int _indiceCarrusel = 0;
   final PageController _pageController = PageController();
@@ -75,7 +78,20 @@ class _SeccionInicioState extends State<SeccionInicio> {
       _cargarFotosRecientesDeSheets(),
       _cargarEventosProximos(),
       _cargarVideoDeFirestore(),
+      _cargarCarruselDeFirestore(),
     ]);
+  }
+
+  Future<void> _cargarCarruselDeFirestore() async {
+    try {
+      final carousel = await PublicContentRepository().getHomeCarousel();
+      if (!mounted) return;
+      setState(() {
+        _carouselImageUrl = carousel['imageUrl'] ?? '';
+        _carouselTitle = carousel['title'] ?? _carouselTitle;
+        _carouselDescription = carousel['description'] ?? _carouselDescription;
+      });
+    } catch (_) {}
   }
 
   Future<void> _cargarNoticiasDeSheets() async {
@@ -222,7 +238,10 @@ class _SeccionInicioState extends State<SeccionInicio> {
     final slides = <Widget>[
       Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: const Color(0xFF2E7D32)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2E7D32),
+          image: _carouselImageUrl.isEmpty ? null : DecorationImage(image: NetworkImage(_carouselImageUrl), fit: BoxFit.cover, opacity: 0.35),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,8 +255,8 @@ class _SeccionInicioState extends State<SeccionInicio> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Proyecto Ambiental PRAE Camilo Verde',
+            Text(
+              _carouselTitle,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -245,8 +264,8 @@ class _SeccionInicioState extends State<SeccionInicio> {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Descubre nuestras iniciativas ecológicas y los avances recientes de nuestra comunidad.',
+            Text(
+              _carouselDescription,
               style: TextStyle(color: Colors.white70, fontSize: 12),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

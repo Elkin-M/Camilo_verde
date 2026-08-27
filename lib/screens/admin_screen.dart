@@ -158,7 +158,9 @@ class _FirestoreGroup extends StatelessWidget {
           if (snapshot.hasError) return _GroupMessage(text: 'No se pudo leer esta sección.');
           if (!snapshot.hasData) return const Card(child: Padding(padding: EdgeInsets.all(18), child: LinearProgressIndicator()));
           if (snapshot.data!.docs.isEmpty) return _GroupMessage(text: emptyText);
-          return Column(children: snapshot.data!.docs.map((doc) {
+          final docs = [...snapshot.data!.docs];
+          docs.sort((a, b) => _dateValue(b.data()).compareTo(_dateValue(a.data())));
+          return Column(children: docs.map((doc) {
             final data = doc.data();
             final title = _value(data, 'title').isNotEmpty ? _value(data, 'title') : _value(data, 'name');
             final mediaUrls = List<String>.from(data['mediaUrls'] ?? const []);
@@ -177,13 +179,43 @@ class _FirestoreGroup extends StatelessWidget {
               subtitle: Text(detail.isEmpty ? 'Sin información adicional' : detail, maxLines: 4, overflow: TextOverflow.ellipsis),
               isThreeLine: detail.isNotEmpty,
               trailing: IconButton(icon: const Icon(Icons.delete_outline), tooltip: 'Eliminar', onPressed: () async {
+                final confirmed = await showDialog<bool>(context: context, builder: (dialogContext) => AlertDialog(
+                  title: const Text('Eliminar registro'),
+                  content: Text('¿Quieres eliminar "$title"?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancelar')),
+                    FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Eliminar')),
+                  ],
+                ));
+                if (confirmed != true || !context.mounted) return;
+                showDialog<void>(context: context, barrierDismissible: false, builder: (_) => const _ProgressDialog(label: 'Eliminando...'));
                 final fileIds = List<String>.from(data['fileIds'] ?? const []);
-                await AdminContentRepository().delete(collection, doc.id, fileIds: fileIds);
+                try {
+                  await AdminContentRepository().delete(collection, doc.id, fileIds: fileIds);
+                } finally {
+                  if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+                }
               }),
             ));
           }).toList());
         },
       );
+
+  DateTime _dateValue(Map<String, dynamic> data) {
+    final value = '${data['date'] ?? data['dateText'] ?? data['fecha'] ?? ''}';
+    final parsed = DateTime.tryParse(value);
+    if (parsed != null) return parsed;
+    final parts = value.split(RegExp(r'[/.-]'));
+    if (parts.length == 3) {
+      final first = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final last = int.tryParse(parts[2]);
+      if (first != null && month != null && last != null) {
+        return first > 31 ? DateTime(first, month, last) : DateTime(last, month, first);
+      }
+    }
+    return DateTime(2000);
+  }
 }
 
 class _GroupMessage extends StatelessWidget {
@@ -192,6 +224,25 @@ class _GroupMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(18), child: Text(text)));
+}
+
+Future<void> _runWithProgress(BuildContext context, String label, Future<void> Function() action) async {
+  showDialog<void>(context: context, barrierDismissible: false, builder: (_) => _ProgressDialog(label: label));
+  try {
+    await action();
+  } finally {
+    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+  }
+}
+
+class _ProgressDialog extends StatelessWidget {
+  const _ProgressDialog({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        content: Row(children: [const SizedBox(width: 24, height: 24, child: CircularProgressIndicator()), const SizedBox(width: 18), Text(label)]),
+      );
 }
 
 class _AddContentButton extends StatelessWidget {
@@ -208,7 +259,15 @@ class _AddContentButton extends StatelessWidget {
       title: Text(collection == 'news' ? 'Añadir noticia' : 'Añadir evento'),
       content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: title, decoration: const InputDecoration(labelText: 'Título')),
-        TextField(controller: date, decoration: const InputDecoration(labelText: 'Fecha')),
+        TextField(
+          controller: date,
+          readOnly: true,
+          onTap: () async {
+            final picked = await showDatePicker(context: dialogContext, firstDate: DateTime(2020), lastDate: DateTime(2100), initialDate: DateTime.now());
+            if (picked != null) date.text = '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+          },
+          decoration: const InputDecoration(labelText: 'Fecha', suffixIcon: Icon(Icons.calendar_today_outlined)),
+        ),
         TextField(controller: body, maxLines: 4, decoration: InputDecoration(labelText: collection == 'news' ? 'Contenido' : 'Hora, lugar e indicaciones')),
         const SizedBox(height: 12),
         OutlinedButton.icon(
@@ -227,19 +286,23 @@ class _AddContentButton extends StatelessWidget {
       ],
     )));
     if (saved?['save'] == true && title.text.trim().isNotEmpty) {
+      if (!context.mounted) return;
       String imageUrl = '';
       final fileIds = <String>[];
       final file = saved?['file'] as PlatformFile?;
-      if (file?.bytes != null) {
-        final upload = await DriveUploadService().upload(bytes: file!.bytes!, name: file.name, contentType: 'image/${file.extension ?? 'jpeg'}', folder: 'evidence');
-        imageUrl = upload.url;
-        fileIds.add(upload.fileId);
-      }
-      final data = collection == 'news'
-          ? {'title': title.text.trim(), 'dateText': date.text.trim(), 'body': body.text.trim(), 'imageUrl': imageUrl, 'fileIds': fileIds}
-          : {'title': title.text.trim(), 'date': date.text.trim(), 'dateText': date.text.trim(), 'time': body.text.trim(), 'place': '', 'instructions': body.text.trim(), 'imageUrl': imageUrl, 'fileIds': fileIds, 'icon': 'event'};
-      await AdminContentRepository().create(collection, data);
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Guardado en Firebase')));
+      await _runWithProgress(context, 'Guardando...', () async {
+        if (file?.bytes != null) {
+          final upload = await DriveUploadService().upload(bytes: file!.bytes!, name: file.name, contentType: 'image/${file.extension ?? 'jpeg'}', folder: 'evidence');
+          imageUrl = upload.url;
+          fileIds.add(upload.fileId);
+        }
+        final data = collection == 'news'
+            ? {'title': title.text.trim(), 'dateText': date.text.trim(), 'body': body.text.trim(), 'imageUrl': imageUrl, 'fileIds': fileIds}
+            : {'title': title.text.trim(), 'date': date.text.trim(), 'dateText': date.text.trim(), 'time': body.text.trim(), 'place': '', 'instructions': body.text.trim(), 'imageUrl': imageUrl, 'fileIds': fileIds, 'icon': 'event'};
+        await AdminContentRepository().create(collection, data);
+      });
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Guardado en Firebase')));
     }
     title.dispose();
     date.dispose();
@@ -261,10 +324,14 @@ class _UploadButton extends StatelessWidget {
   Future<void> _pick(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null || result.files.single.bytes == null) return;
+    if (!context.mounted) return;
     final file = result.files.single;
-    final upload = await DriveUploadService().upload(bytes: file.bytes!, name: file.name, contentType: 'application/octet-stream', folder: folder);
-    await AdminContentRepository().create('models', {'title': file.name, 'url': upload.url, 'fileIds': [upload.fileId], 'active': true});
-    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Modelo guardado en Firebase')));
+    await _runWithProgress(context, 'Subiendo modelo...', () async {
+      final upload = await DriveUploadService().upload(bytes: file.bytes!, name: file.name, contentType: 'application/octet-stream', folder: folder);
+      await AdminContentRepository().create('models', {'title': file.name, 'url': upload.url, 'fileIds': [upload.fileId], 'active': true});
+    });
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Modelo guardado en Firebase')));
   }
 
   @override
@@ -337,7 +404,15 @@ class _AddEvidenceButtonState extends State<_AddEvidenceButton> {
   @override
   Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         TextField(controller: _title, decoration: const InputDecoration(labelText: 'Título de la evidencia')),
-        TextField(controller: _date, decoration: const InputDecoration(labelText: 'Fecha')),
+        TextField(
+          controller: _date,
+          readOnly: true,
+          onTap: () async {
+            final picked = await showDatePicker(context: context, firstDate: DateTime(2020), lastDate: DateTime(2100), initialDate: DateTime.now());
+            if (picked != null) _date.text = '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+          },
+          decoration: const InputDecoration(labelText: 'Fecha', suffixIcon: Icon(Icons.calendar_today_outlined)),
+        ),
         TextField(controller: _description, maxLines: 2, decoration: const InputDecoration(labelText: 'Descripción')),
         const SizedBox(height: 12),
         OutlinedButton.icon(onPressed: _selectImage, icon: const Icon(Icons.image_outlined), label: Text(_file == null ? 'Seleccionar imagen' : _file!.name)),
@@ -356,11 +431,16 @@ class _HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<_HomeTab> {
   final _controller = TextEditingController();
+  final _carouselTitle = TextEditingController();
+  final _carouselDescription = TextEditingController();
+  String _carouselImageUrl = '';
+  bool _savingHome = false;
 
   @override
   void initState() {
     super.initState();
     _loadVideo();
+    _loadCarousel();
   }
 
   Future<void> _loadVideo() async {
@@ -368,14 +448,51 @@ class _HomeTabState extends State<_HomeTab> {
     if (mounted) _controller.text = snapshot.data()?['videoUrl']?.toString() ?? '';
   }
 
+  Future<void> _loadCarousel() async {
+    final data = await FirebaseFirestore.instance.collection('settings').doc('home').get();
+    if (!mounted) return;
+    final values = data.data() ?? {};
+    setState(() {
+      _carouselImageUrl = values['carouselImageUrl']?.toString() ?? '';
+      _carouselTitle.text = values['carouselTitle']?.toString() ?? '';
+      _carouselDescription.text = values['carouselDescription']?.toString() ?? '';
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _carouselTitle.dispose();
+    _carouselDescription.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 32), children: [
+        const _SectionHeading(icon: Icons.view_carousel_outlined, title: 'Carrusel de Inicio', subtitle: 'Selecciona la imagen y cambia el texto principal'),
+        Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(stream: FirebaseFirestore.instance.collection('evidences').snapshots(), builder: (context, snapshot) {
+            final choices = snapshot.data?.docs ?? const [];
+            return DropdownButtonFormField<String>(initialValue: _carouselImageUrl.isEmpty ? null : _carouselImageUrl, isExpanded: true, decoration: const InputDecoration(labelText: 'Imagen del carrusel'), items: choices.expand((doc) {
+              final data = doc.data();
+              final values = data['mediaUrls'] ?? data['imageUrls'] ?? data['imagenes'] ?? const [];
+              final urls = values is List ? List<String>.from(values) : [values.toString()];
+              return urls.where((url) => url.isNotEmpty).map((url) => DropdownMenuItem(value: url, child: Text(url, overflow: TextOverflow.ellipsis)));
+            }).toList(), onChanged: (value) => setState(() => _carouselImageUrl = value ?? ''));
+          }),
+          if (_carouselImageUrl.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Image.network(_carouselImageUrl, height: 150, fit: BoxFit.cover)),
+          TextField(controller: _carouselTitle, decoration: const InputDecoration(labelText: 'Título escrito')),
+          TextField(controller: _carouselDescription, maxLines: 3, decoration: const InputDecoration(labelText: 'Texto escrito')),
+          const SizedBox(height: 14),
+          FilledButton.icon(onPressed: _savingHome ? null : () async {
+            setState(() => _savingHome = true);
+            try {
+              await AdminContentRepository().setHomeCarousel(imageUrl: _carouselImageUrl, title: _carouselTitle.text.trim(), description: _carouselDescription.text.trim());
+              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Carrusel actualizado')));
+            } finally { if (mounted) setState(() => _savingHome = false); }
+          }, icon: _savingHome ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.save_outlined), label: Text(_savingHome ? 'Guardando...' : 'Guardar carrusel')),
+        ]))),
+        const SizedBox(height: 28),
         const _SectionHeading(icon: Icons.play_circle_outline, title: 'Video del carrusel', subtitle: 'Enlace que aparece en la sección de avances'),
         Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           TextField(controller: _controller, keyboardType: TextInputType.url, decoration: const InputDecoration(labelText: 'Enlace del video', hintText: 'https://...')),
