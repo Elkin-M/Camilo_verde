@@ -34,6 +34,24 @@ function doPost(event) {
   }
 }
 
+function doGet(event) {
+  try {
+    const params = event.parameter || {};
+    if (params.action !== 'trash') return response({ error: 'Acción no válida.' }, 400);
+    if (!params.idToken) return response({ error: 'Falta el token de Firebase.' }, 401);
+    if (!params.fileId) return response({ error: 'Falta el ID del archivo.' }, 400);
+    const firebaseUser = verifyFirebaseToken(params.idToken);
+    if (!firebaseUser) return response({ error: 'Token de Firebase inválido.' }, 401);
+    const admin = getAdmin(firebaseUser.localId, params.idToken);
+    if (!admin || admin.active !== true) return response({ error: 'El usuario no es un administrador activo.' }, 403);
+    DriveApp.getFileById(params.fileId).setTrashed(true);
+    return response({ success: true, fileId: params.fileId });
+  } catch (error) {
+    console.error(error);
+    return response({ error: 'No se pudo eliminar el archivo: ' + error.message }, 500);
+  }
+}
+
 function verifyFirebaseToken(idToken) {
   const result = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + CONFIG.firebaseApiKey, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ idToken: idToken }), muteHttpExceptions: true });
   if (result.getResponseCode() !== 200) return null;

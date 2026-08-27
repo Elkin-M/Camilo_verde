@@ -64,7 +64,12 @@ class DriveUploadService {
   Future<void> trash(String fileId) async {
     final token = await FirebaseAuth.instance.currentUser?.getIdToken();
     if (token == null) throw StateError('La sesión de administrador expiró.');
-    final response = await _postJson({'idToken': token, 'action': 'trash', 'fileId': fileId});
+    final endpoint = Uri.parse(BackendConfig.driveUploadEndpoint).replace(queryParameters: {
+      'action': 'trash',
+      'idToken': token,
+      'fileId': fileId,
+    });
+    final response = await http.get(endpoint);
     final data = _decodeResponse(response);
     if (response.statusCode >= 400 || data['error'] != null) {
       throw StateError('No se pudo enviar el archivo a la papelera.');

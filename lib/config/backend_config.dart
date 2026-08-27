@@ -19,7 +19,7 @@ class BackendConfig {
   );
   static const driveUploadEndpoint = String.fromEnvironment(
     'DRIVE_UPLOAD_ENDPOINT',
-    defaultValue: 'https://script.google.com/macros/s/AKfycbwoH0wrAVnaGi-fLCyiLZFx40osgY5kI5Crx_vt4wa6C2GZ-3JX0OvUjfyh_1MvfBaHig/exec',
+    defaultValue: 'https://script.google.com/macros/s/AKfycbzKFiBSRFKSRpW_BNEuIlmyAFZDQrONEl44QbWrHuObK3DS8-u0R45XDBj6Kj4hqejriQ/exec',
   );
 
   static FirebaseOptions get options => FirebaseOptions(

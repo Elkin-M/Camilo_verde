@@ -190,6 +190,33 @@ class _SeccionInicioState extends State<SeccionInicio> {
   Future<void> _cargarEventosProximos() async {
     final url = Uri.parse(AppConstants.sheetEventosUrl);
     try {
+      final firestoreEvents = await PublicContentRepository().getEvents();
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final validEvents = firestoreEvents
+          .map((event) => (event: event, date: DateTime.tryParse(event.date)))
+          .where((item) => item.date != null && !item.date!.isBefore(todayStart))
+          .map((item) => {
+                'titulo': item.event.title,
+                'fecha': item.date!,
+                'fechaTexto': item.event.dateText,
+                'horaTexto': item.event.time,
+                'lugar': item.event.place,
+                'imagen': item.event.imageUrl,
+                'indicaciones': item.event.instructions,
+                'icono': item.event.icon,
+              })
+          .toList();
+      if (validEvents.isNotEmpty) {
+        validEvents.sort((a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime));
+        if (mounted) {
+          setState(() {
+            eventosProximos = validEvents;
+            cargandoEventos = false;
+          });
+        }
+        return;
+      }
       final respuesta = await http.get(url);
       if (respuesta.statusCode == 200) {
         final lineas = utf8.decode(respuesta.bodyBytes).split('\n');
@@ -201,7 +228,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
           final celdas = lineas[i].split('\t');
           if (celdas.length < 2) continue;
           final fecha = DateTime.tryParse(celdas[1].trim()) ?? DateTime(2000);
-          if (fecha.isBefore(hoyInicio)) continue;
+          if (fecha.year == 2000 || fecha.isBefore(hoyInicio)) continue;
           eventos.add({
             'titulo': celdas[0].trim(),
             'fecha': fecha,
@@ -417,7 +444,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
       if (noticiasDinamicas.isEmpty)
         const Text('No hay noticias cargadas hoy')
       else
-        _buildCardNoticia(noticiasDinamicas.first),
+        ...noticiasDinamicas.map(_buildCardNoticia),
       const SizedBox(height: 25),
       _buildSeccionTitulo('Próximos Eventos'),
       const SizedBox(height: 10),

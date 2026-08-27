@@ -189,7 +189,7 @@ class _FirestoreGroup extends StatelessWidget {
                 ));
                 if (confirmed != true || !context.mounted) return;
                 showDialog<void>(context: context, barrierDismissible: false, builder: (_) => const _ProgressDialog(label: 'Eliminando...'));
-                final fileIds = List<String>.from(data['fileIds'] ?? const []);
+                final fileIds = _fileIds(data);
                 try {
                   await AdminContentRepository().delete(collection, doc.id, fileIds: fileIds);
                 } finally {
@@ -215,6 +215,25 @@ class _FirestoreGroup extends StatelessWidget {
       }
     }
     return DateTime(2000);
+  }
+
+  List<String> _fileIds(Map<String, dynamic> data) {
+    final ids = <String>{...List<String>.from(data['fileIds'] ?? const [])};
+    final values = <dynamic>[
+      data['mediaUrls'],
+      data['imageUrls'],
+      data['imagenes'],
+      data['imageUrl'],
+      data['url'],
+    ];
+    for (final value in values) {
+      final urls = value is List ? value : [value];
+      for (final url in urls) {
+        final match = RegExp(r'(?:id=|/d/)([A-Za-z0-9_-]{10,})').firstMatch('$url');
+        if (match != null) ids.add(match.group(1)!);
+      }
+    }
+    return ids.toList();
   }
 }
 
