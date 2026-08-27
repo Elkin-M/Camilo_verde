@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:camilo_verde/services/admin_auth_service.dart';
 import 'package:camilo_verde/services/admin_content_repository.dart';
 import 'package:camilo_verde/services/drive_upload_service.dart';
+import 'package:camilo_verde/config/backend_config.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -289,6 +290,7 @@ class _AddEvidenceButtonState extends State<_AddEvidenceButton> {
   final _date = TextEditingController();
   final _description = TextEditingController();
   bool _saving = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -308,10 +310,24 @@ class _AddEvidenceButtonState extends State<_AddEvidenceButton> {
     setState(() => _saving = true);
     try {
       final upload = await DriveUploadService().upload(bytes: _file!.bytes!, name: _file!.name, contentType: 'image/${_file!.extension ?? 'jpeg'}', folder: 'evidence');
-      await AdminContentRepository().create('evidences', {'title': _title.text.trim(), 'date': _date.text.trim(), 'mediaUrls': [upload.url], 'fileIds': [upload.fileId], 'description': _description.text.trim()});
+      try {
+        await AdminContentRepository().create('evidences', {'title': _title.text.trim(), 'date': _date.text.trim(), 'mediaUrls': [upload.url], 'fileIds': [upload.fileId], 'description': _description.text.trim()});
+      } catch (_) {
+        await DriveUploadService().trash(upload.fileId);
+        rethrow;
+      }
       if (mounted) {
-        setState(() => _file = null);
+        setState(() {
+          _file = null;
+          _error = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evidencia guardada en Firebase y Drive')));
+      }
+    } catch (error) {
+      final message = error.toString().replaceFirst('Bad state: ', '');
+      if (mounted) {
+        setState(() => _error = message);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -326,6 +342,7 @@ class _AddEvidenceButtonState extends State<_AddEvidenceButton> {
         const SizedBox(height: 12),
         OutlinedButton.icon(onPressed: _selectImage, icon: const Icon(Icons.image_outlined), label: Text(_file == null ? 'Seleccionar imagen' : _file!.name)),
         if (_file?.bytes != null) Padding(padding: const EdgeInsets.only(top: 12), child: Image.memory(_file!.bytes!, height: 180, fit: BoxFit.contain)),
+        if (_error != null) Padding(padding: const EdgeInsets.only(top: 10), child: Text(_error!, style: const TextStyle(color: Colors.red))),
         const SizedBox(height: 12),
         FilledButton.icon(onPressed: _saving ? null : _save, icon: const Icon(Icons.cloud_upload_outlined), label: Text(_saving ? 'Guardando...' : 'Guardar evidencia')),
       ])));
@@ -370,7 +387,7 @@ class _HomeTabState extends State<_HomeTab> {
         ]))),
         const SizedBox(height: 28),
         const _SectionHeading(icon: Icons.info_outline, title: 'Contenido conectado', subtitle: 'Los cambios se leen directamente desde Firestore'),
-        const Card(child: ListTile(leading: Icon(Icons.cloud_done_outlined), title: Text('Firebase conectado'), subtitle: Text('Las noticias, eventos, evidencias y modelos aparecen en la pestaña Contenido.'))),
+        Card(child: ListTile(leading: const Icon(Icons.cloud_done_outlined), title: const Text('Firebase conectado'), subtitle: Text('Proyecto: ${BackendConfig.projectId}\nLas noticias, eventos, evidencias y modelos aparecen en la pestaña Contenido.'))),
       ]);
 }
 

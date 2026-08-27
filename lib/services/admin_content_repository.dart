@@ -6,8 +6,22 @@ class AdminContentRepository {
   final _db = FirebaseBackend.firestore;
   final _drive = DriveUploadService();
 
-  Future<DocumentReference<Map<String, dynamic>>> create(String collection, Map<String, dynamic> data) =>
-      _db.collection(collection).add({...data, 'published': true, 'createdAt': FieldValue.serverTimestamp()});
+  Future<DocumentReference<Map<String, dynamic>>> create(String collection, Map<String, dynamic> data) async {
+    try {
+      final reference = await _db.collection(collection).add({
+        ...data,
+        'published': true,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      final saved = await reference.get();
+      if (!saved.exists) {
+        throw StateError('Firebase no confirmó el documento ${reference.path}.');
+      }
+      return reference;
+    } on FirebaseException catch (error) {
+      throw StateError('Firebase ${error.code}: ${error.message ?? 'rechazó la escritura.'}');
+    }
+  }
 
   Future<void> setHomeVideo(String url) => _db.collection('settings').doc('home').set({'videoUrl': url, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
 
