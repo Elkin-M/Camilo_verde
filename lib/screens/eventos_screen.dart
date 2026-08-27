@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:camilo_verde/config/constants.dart';
+import 'package:camilo_verde/services/public_content_repository.dart';
 
 class SeccionEventos extends StatefulWidget {
   const SeccionEventos({super.key});
@@ -31,6 +32,25 @@ class _SeccionEventosState extends State<SeccionEventos> {
     final url = Uri.parse(AppConstants.sheetEventosUrl);
 
     try {
+      final firestoreEvents = await PublicContentRepository().getEvents();
+      if (firestoreEvents.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            eventosDinamicos = firestoreEvents.map((event) => {
+              'titulo': event.title,
+              'fecha': DateTime.tryParse(event.date) ?? DateTime(2000),
+              'fechaTexto': event.dateText,
+              'horaTexto': event.time,
+              'lugar': event.place,
+              'imagen': event.imageUrl,
+              'indicaciones': event.instructions,
+              'icono': _mapearIcono(event.icon),
+            }).toList();
+            cargando = false;
+          });
+        }
+        return;
+      }
       final respuesta = await http.get(url);
       if (respuesta.statusCode == 200) {
         String tsvTexto = utf8.decode(respuesta.bodyBytes);

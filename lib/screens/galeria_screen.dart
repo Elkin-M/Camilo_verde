@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:camilo_verde/config/constants.dart';
+import 'package:camilo_verde/services/public_content_repository.dart';
 import 'package:camilo_verde/widgets/visor_multimedia.dart';
 
 class SeccionGaleria extends StatefulWidget {
@@ -26,6 +27,7 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
     final url = Uri.parse(AppConstants.sheetGaleriaUrl);
 
     try {
+      final firestoreEvidences = await PublicContentRepository().getEvidences();
       final respuesta = await http.get(url);
       if (respuesta.statusCode == 200) {
         String tsvTexto = utf8.decode(respuesta.bodyBytes);
@@ -48,7 +50,15 @@ class _SeccionGaleriaState extends State<SeccionGaleria> {
 
         if (mounted) {
           setState(() {
-            evidencias = temporal;
+            evidencias = [
+              ...firestoreEvidences.map((evidence) => {
+                'nombre': evidence.title,
+                'fecha': evidence.date,
+                'imagenes': evidence.mediaUrls,
+                'desc': evidence.description,
+              }),
+              ...temporal,
+            ];
             cargando = false;
             _ordenarAlCargar();
           });

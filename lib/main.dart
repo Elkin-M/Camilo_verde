@@ -7,9 +7,12 @@ import 'package:camilo_verde/screens/eventos_screen.dart';
 import 'package:camilo_verde/screens/juego_screen.dart';
 import 'package:camilo_verde/screens/juegos_screen.dart';
 import 'package:camilo_verde/screens/proyecto_3d_screen.dart';
+import 'package:camilo_verde/screens/admin_screen.dart';
+import 'package:camilo_verde/services/firebase_backend.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseBackend.initialize();
   runApp(const CamiloVerdeApp());
 }
 
@@ -92,6 +95,14 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
             tooltip: 'Nosotros',
             icon: const Icon(Icons.info_outline),
             onPressed: () => setState(() => _indiceActual = 4),
+          ),
+          IconButton(
+            tooltip: 'Administración',
+            icon: const Icon(Icons.lock_outline),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminScreen()),
+            ),
           ),
           const SizedBox(width: 8),
         ],

@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function activeAdmin() {
+      return signedIn() && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+    function superAdmin() {
+      return activeAdmin() && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    match /admins/{uid} {
+      allow read: if activeAdmin();
+      allow update: if superAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'updatedAt']);
+      allow create, delete: if false;
+    }
+
+    match /news/{id} { allow read: if resource.data.published == true || activeAdmin(); allow write: if activeAdmin(); }
+    match /events/{id} { allow read: if resource.data.published == true || activeAdmin(); allow write: if activeAdmin(); }
+    match /evidences/{id} { allow read: if resource.data.published == true || activeAdmin(); allow write: if activeAdmin(); }
+    match /models/{id} { allow read: if resource.data.active == true || activeAdmin(); allow write: if activeAdmin(); }
+    match /settings/{id} { allow read: if true; allow write: if activeAdmin(); }
+  }
+}

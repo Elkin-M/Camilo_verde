@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:camilo_verde/config/constants.dart';
+import 'package:camilo_verde/services/public_content_repository.dart';
 import 'package:camilo_verde/widgets/visor_multimedia.dart';
 
 class SeccionInicio extends StatefulWidget {
@@ -22,6 +23,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
   bool cargandoNoticias = true;
   bool cargandoFotos = true;
   bool cargandoEventos = true;
+  String _videoAvancesUrl = AppConstants.videoAvancesUrl;
 
   int _indiceCarrusel = 0;
   final PageController _pageController = PageController();
@@ -35,6 +37,15 @@ class _SeccionInicioState extends State<SeccionInicio> {
       const Duration(seconds: 7),
       (_) => _avanzarCarrusel(),
     );
+  }
+
+  Future<void> _cargarVideoDeFirestore() async {
+    try {
+      final url = await PublicContentRepository().getVideoUrl();
+      if (mounted && url != null && url.isNotEmpty) {
+        setState(() => _videoAvancesUrl = url);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -63,12 +74,28 @@ class _SeccionInicioState extends State<SeccionInicio> {
       _cargarNoticiasDeSheets(),
       _cargarFotosRecientesDeSheets(),
       _cargarEventosProximos(),
+      _cargarVideoDeFirestore(),
     ]);
   }
 
   Future<void> _cargarNoticiasDeSheets() async {
     final url = Uri.parse(AppConstants.sheetNoticiasUrl);
     try {
+      final firestoreNews = await PublicContentRepository().getNews();
+      if (firestoreNews.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            noticiasDinamicas = firestoreNews.map((news) => {
+              'titulo': news.title,
+              'imagen': news.imageUrl,
+              'fechaTexto': news.dateText,
+              'contenido': news.body,
+            }).toList();
+            cargandoNoticias = false;
+          });
+        }
+        return;
+      }
       final respuesta = await http.get(url);
       if (respuesta.statusCode == 200) {
         final lineas = utf8.decode(respuesta.bodyBytes).split('\n');
@@ -101,10 +128,12 @@ class _SeccionInicioState extends State<SeccionInicio> {
   Future<void> _cargarFotosRecientesDeSheets() async {
     final url = Uri.parse(AppConstants.sheetGaleriaUrl);
     try {
-      final respuesta = await http.get(url);
-      if (respuesta.statusCode == 200) {
+      final firestoreEvidences = await PublicContentRepository().getEvidences();
+      final evidencias = <Map<String, dynamic>>[];
+      try {
+        final respuesta = await http.get(url);
+        if (respuesta.statusCode == 200) {
         final lineas = utf8.decode(respuesta.bodyBytes).split('\n');
-        final evidencias = <Map<String, dynamic>>[];
         for (int i = 1; i < lineas.length; i++) {
           if (lineas[i].trim().isEmpty) continue;
           final celdas = lineas[i].split('\t');
@@ -117,17 +146,24 @@ class _SeccionInicioState extends State<SeccionInicio> {
             });
           }
         }
+        }
+      } catch (_) {}
+        evidencias.addAll(firestoreEvidences.map((evidence) => {
+          'nombre': evidence.title,
+          'fecha': evidence.date,
+          'imagenes': evidence.mediaUrls,
+          'desc': evidence.description,
+        }));
         evidencias.sort((a, b) {
           final fechaA = DateTime.tryParse(a['fecha']) ?? DateTime(2000);
           final fechaB = DateTime.tryParse(b['fecha']) ?? DateTime(2000);
           return fechaB.compareTo(fechaA);
         });
-        if (mounted) {
-          setState(() {
-            fotosRecientes = evidencias.take(5).toList();
-            cargandoFotos = false;
-          });
-        }
+      if (mounted) {
+        setState(() {
+          fotosRecientes = evidencias.take(5).toList();
+          cargandoFotos = false;
+        });
       }
     } catch (e) {
       debugPrint('Error cargando fotos de bienvenida: $e');
@@ -218,7 +254,7 @@ class _SeccionInicioState extends State<SeccionInicio> {
             const Spacer(),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () => _abrirVideo(AppConstants.videoAvancesUrl),
+                onPressed: () => _abrirVideo(_videoAvancesUrl),
                 icon: const Icon(Icons.play_circle_fill, color: Colors.green),
                 label: const Text('Ver Últimos Avances'),
                 style: ElevatedButton.styleFrom(
