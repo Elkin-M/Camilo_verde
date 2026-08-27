@@ -10,7 +10,7 @@ class WorldLevel extends World {
   }
 
   Future<ParallaxComponent> loadParallaxComponent() async {
-    return ParallaxComponent.load(
+    final parallax = await ParallaxComponent.load(
       [
         ParallaxImageData('Sprites/Game Objects/Background.png'),
         ParallaxImageData('Sprites/Game Objects/Foreground.png'),
@@ -19,5 +19,7 @@ class WorldLevel extends World {
       velocityMultiplierDelta: Vector2(1.5, 1),
       size: CamiloGame.sceneSize,
     );
+    parallax.priority = -1;
+    return parallax;
   }
 }

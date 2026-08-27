@@ -10,26 +10,19 @@ class MemoramaScreen extends StatefulWidget {
 }
 
 class _MemoramaScreenState extends State<MemoramaScreen> {
-  final List<IconData> _iconos = [
-    Icons.eco,
-    Icons.eco,
-    Icons.water_drop,
-    Icons.water_drop,
-    Icons.recycling,
-    Icons.recycling,
-    Icons.wb_sunny,
-    Icons.wb_sunny,
-    Icons.forest,
-    Icons.forest,
-    Icons.pets,
-    Icons.pets,
+  final List<List<IconData>> _niveles = [
+    [Icons.eco, Icons.water_drop, Icons.recycling, Icons.wb_sunny, Icons.forest, Icons.pets],
+    [Icons.eco, Icons.water_drop, Icons.recycling, Icons.wb_sunny, Icons.forest, Icons.pets, Icons.energy_savings_leaf, Icons.compost],
+    [Icons.eco, Icons.water_drop, Icons.recycling, Icons.wb_sunny, Icons.forest, Icons.pets, Icons.energy_savings_leaf, Icons.compost, Icons.air, Icons.public],
   ];
+  late List<IconData> _iconos;
   final Random _random = Random();
   late List<int> _baraja;
   final List<int> _descubiertas = [];
   final Set<int> _parejas = {};
   bool _bloqueado = false;
   int _movimientos = 0;
+  int _nivel = 1;
 
   @override
   void initState() {
@@ -38,6 +31,7 @@ class _MemoramaScreenState extends State<MemoramaScreen> {
   }
 
   void _reiniciar() {
+    _iconos = [..._niveles[_nivel - 1], ..._niveles[_nivel - 1]];
     _baraja = List<int>.generate(_iconos.length, (index) => index);
     _baraja.shuffle(_random);
     _descubiertas.clear();
@@ -68,9 +62,13 @@ class _MemoramaScreenState extends State<MemoramaScreen> {
       _bloqueado = false;
     });
     if (_parejas.length == _baraja.length && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Completaste el memorama!')),
-      );
+      if (_nivel < _niveles.length) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('¡Nivel $_nivel completado!')));
+        setState(() => _nivel++);
+        _reiniciar();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Completaste todos los niveles!')));
+      }
     }
   }
 
@@ -90,7 +88,7 @@ class _MemoramaScreenState extends State<MemoramaScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Movimientos: $_movimientos'),
-                Text('${_parejas.length ~/ 2}/6 parejas'),
+                Text('Nivel $_nivel · ${_parejas.length ~/ 2}/${_iconos.length ~/ 2} parejas'),
                 IconButton(
                   onPressed: () => setState(_reiniciar),
                   icon: const Icon(Icons.refresh),
@@ -146,7 +144,13 @@ class SopaCamilistaScreen extends StatefulWidget {
 }
 
 class _SopaCamilistaScreenState extends State<SopaCamilistaScreen> {
-  final List<String> _palabras = ['AGUA', 'VERDE', 'FLORA', 'RECICLA'];
+  final List<List<String>> _nivelesPalabras = [
+    ['AGUA', 'VERDE', 'FLORA', 'RECICLA'],
+    ['SOLAR', 'BOSQUE', 'ECOTIPO', 'ARBOL'],
+    ['AGUA', 'VERDE', 'FLORA', 'RECICLA', 'SOLAR', 'BOSQUE', 'ECOTIPO', 'ARBOL'],
+  ];
+  int _nivel = 1;
+  List<String> get _palabras => _nivelesPalabras[_nivel - 1];
   final List<String> _letras = [
     'A',
     'G',
@@ -232,9 +236,16 @@ class _SopaCamilistaScreenState extends State<SopaCamilistaScreen> {
       }
     });
     if (_encontradas.length == _palabras.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Encontraste todas las palabras!')),
-      );
+      if (_nivel < _nivelesPalabras.length) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('¡Nivel $_nivel completado!')));
+        setState(() {
+          _nivel++;
+          _seleccionadas.clear();
+          _encontradas.clear();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Encontraste todas las palabras!')));
+      }
     }
   }
 
@@ -249,8 +260,8 @@ class _SopaCamilistaScreenState extends State<SopaCamilistaScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Encuentra y marca las palabras ambientales.',
+          Text(
+            'Nivel $_nivel · Encuentra las palabras ambientales.',
             style: TextStyle(fontSize: 15),
           ),
           const SizedBox(height: 12),
@@ -358,6 +369,36 @@ class _TriviaVerdeScreenState extends State<TriviaVerdeScreen> {
       'Usarla varias veces',
       'Botarla siempre',
       'Quemarla',
+    ], 0),
+    _Pregunta('¿Qué residuo debe ir al contenedor negro?', [
+      'Residuos no aprovechables',
+      'Cartón limpio',
+      'Botellas de vidrio',
+    ], 0),
+    _Pregunta('¿Qué fuente produce energía usando el sol?', [
+      'Solar',
+      'Sonora',
+      'Manual',
+    ], 0),
+    _Pregunta('¿Por qué son importantes los árboles?', [
+      'Ayudan a producir oxígeno',
+      'Aumentan la basura',
+      'Contaminan el agua',
+    ], 0),
+    _Pregunta('¿Cuál es una buena forma de ahorrar energía?', [
+      'Apagar las luces que no usamos',
+      'Dejar todo encendido',
+      'Abrir el refrigerador sin necesidad',
+    ], 0),
+    _Pregunta('¿Qué significa reutilizar?', [
+      'Usar un objeto nuevamente',
+      'Botarlo después de usarlo',
+      'Quemarlo',
+    ], 0),
+    _Pregunta('¿Qué debemos hacer con una llave que gotea?', [
+      'Repararla',
+      'Dejarla abierta',
+      'Ignorarla',
     ], 0),
   ];
   int _indice = 0;
